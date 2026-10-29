@@ -1,0 +1,52 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ORACLIA — Espace unifié</title><style>
+body{margin:0;background:#f2f0f6;color:#27213a;font:16px system-ui,Arial}
+header{background:#302047;color:white;padding:14px 22px}header strong{font-size:22px}
+nav{display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px;background:white}
+button{border:1px solid #bbb4ca;border-radius:9px;padding:11px 15px;background:#f7f5fa;color:#302047;cursor:pointer;font-weight:600}
+button.active{background:#302047;color:white}
+main{padding:0 12px 12px}iframe{display:block;width:100%;height:calc(100vh - 151px);min-height:640px;border:1px solid #c6bfd2;background:white;border-radius:10px}
+small{color:#5b5069}#note{padding:6px 20px;font-size:13px}</style></head><body>
+<header><strong>ORACLIA</strong> — Web Bêta v14.9</header>
+<nav><button class="active" data-src="application/ORACLIA_IA.html">Application Web Bêta v14.9</button>
+
+
+</nav>
+<div id="note">Version de test sans laboratoire PalmScan ni moteur IA distant. Ne chargez pas de dossiers personnels appartenant à autrui. Les données restent dans votre navigateur sauf export volontaire ; effacez-les sur un appareil partagé.</div>
+<main><iframe id="vue" title="Module ORACLIA" src="application/ORACLIA_IA.html" allow="camera"></iframe></main>
+<script>
+const frame=document.querySelector('#vue');let observer=null,resizePending=false;
+function sizeApplication(){
+ if(!frame.dataset.srcMode || frame.dataset.srcMode!=='application')return;
+ try{
+  const d=frame.contentDocument;if(!d)return;
+  const h=Math.max(d.documentElement.scrollHeight,d.body?.scrollHeight||0);
+  if(h>0 && Math.abs(frame.offsetHeight-h)>3)frame.style.height=(h+4)+'px';
+ }catch(e){}
+}
+function scheduleSize(){if(resizePending)return;resizePending=true;requestAnimationFrame(()=>{resizePending=false;sizeApplication();});}
+function prepareFrame(){
+ if(observer){observer.disconnect();observer=null;}
+ const isApp=frame.getAttribute('src')==='application/ORACLIA_IA.html';
+ frame.dataset.srcMode=isApp?'application':'laboratory';
+ if(!isApp){frame.style.height='calc(100vh - 151px)';return;}
+ frame.style.height='800px';
+ try{
+  const d=frame.contentDocument;
+  d.documentElement.style.overflowY='hidden';d.body.style.overflowY='visible';
+  observer=new ResizeObserver(scheduleSize);
+  observer.observe(d.documentElement);if(d.body)observer.observe(d.body);
+  d.addEventListener('click',scheduleSize,true);
+  d.addEventListener('change',scheduleSize,true);
+  d.addEventListener('input',scheduleSize,true);
+  d.querySelectorAll('img').forEach(img=>img.addEventListener('load',scheduleSize));
+  scheduleSize();
+ }catch(e){}
+}
+frame.addEventListener('load',prepareFrame);
+for(const b of document.querySelectorAll('button[data-src]'))b.onclick=()=>{
+ document.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+ b.classList.add('active');frame.src=b.dataset.src;
+};
+window.addEventListener('resize',scheduleSize);
+</script></body></html>

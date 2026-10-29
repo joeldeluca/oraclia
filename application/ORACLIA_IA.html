@@ -79,7 +79,7 @@ function updateMountProgress(){if($(&#x27;mountProgress&#x27;))$(&#x27;mountProg
 function buttons(){const c=$(&#x27;mountbuttons&#x27;);c.replaceChildren();for(const d of defs){const m=mounts[d.id],card=document.createElement(&#x27;div&#x27;);card.className=&#x27;mountcard&#x27;+(d.id===selected?&#x27; active&#x27;:&#x27;&#x27;)+(m.rating!==&#x27;unknown&#x27;?&#x27; completed&#x27;:&#x27;&#x27;);const heading=document.createElement(&#x27;button&#x27;);heading.type=&#x27;button&#x27;;heading.className=&#x27;mountheading&#x27;;heading.innerHTML=&#x27;&lt;span style=&quot;color:&#x27;+d.color+&#x27;&quot;&gt;●&lt;/span&gt; &#x27;+d.name+&#x27;&lt;small&gt;&#x27;+d.sub+&#x27;&lt;/small&gt;&#x27;;heading.onclick=()=&gt;{select(d.id);setMode(&#x27;mounts&#x27;)};const sel=document.createElement(&#x27;select&#x27;);sel.setAttribute(&#x27;aria-label&#x27;,&#x27;Relief du mont de &#x27;+d.name);for(const [val,lab] of [[&#x27;unknown&#x27;,&#x27;Indéterminé / non évalué&#x27;],[&#x27;low&#x27;,&#x27;Peu marqué&#x27;],[&#x27;medium&#x27;,&#x27;Moyen&#x27;],[&#x27;high&#x27;,&#x27;Prononcé&#x27;]]){const o=document.createElement(&#x27;option&#x27;);o.value=val;o.textContent=lab;sel.appendChild(o)}sel.value=m.rating;sel.onchange=e=&gt;{mounts[d.id].rating=e.target.value;selected=d.id;buttons();renderMounts();updateMountProgress();analyze()};card.append(heading,sel);c.appendChild(card)}}
 function select(id){selected=id;const d=defs.find(v=&gt;v.id===id);$(&#x27;notes&#x27;).value=mounts[id].notes;renderMounts();buttons();updateMountProgress()}
 function handLabel(){const v=$(&#x27;hand&#x27;).value;$(&#x27;handResult&#x27;).textContent=v===&#x27;right&#x27;?&#x27;Main droite ✓&#x27;:v===&#x27;left&#x27;?&#x27;Main gauche ✓&#x27;:&#x27;À déterminer&#x27;}
-$(&#x27;hand&#x27;).addEventListener(&#x27;change&#x27;,()=&gt;{handLabel();if(!Object.values(lines).some(v=&gt;v.validated)&amp;&amp;Object.values(mounts).every(v=&gt;v.rating===&#x27;unknown&#x27;)){initMounts();renderMounts();}});
+$(&#x27;hand&#x27;).addEventListener(&#x27;change&#x27;,()=&gt;{handLabel();or149Panels(mode);if(!Object.values(lines).some(v=&gt;v.validated)&amp;&amp;Object.values(mounts).every(v=&gt;v.rating===&#x27;unknown&#x27;)){initMounts();renderMounts();}});
 $(&#x27;thumbIdentify&#x27;).onclick=()=&gt;{if(!imageData){status(&#x27;Charge une photographie avant de repérer le pouce.&#x27;);return}thumbPicking=true;setMode(&#x27;lines&#x27;);$(&#x27;thumbHelp&#x27;).textContent=&#x27;Clique maintenant directement sur le POUCE de la photographie à gauche (pas sur un mont).&#x27;;$(&#x27;thumbHelp&#x27;).style.fontWeight=&#x27;bold&#x27;;status(&#x27;Clique sur le pouce visible dans la photographie.&#x27;);};
 $(&#x27;overlay&#x27;).addEventListener(&#x27;pointerdown&#x27;,e=&gt;{if(!thumbPicking)return;e.preventDefault();e.stopImmediatePropagation();const p=pt(e);$(&#x27;hand&#x27;).value=p.x&gt;=384?&#x27;right&#x27;:&#x27;left&#x27;;thumbPicking=false;handLabel();$(&#x27;thumbHelp&#x27;).textContent=&#x27;Main déterminée à partir du côté du pouce. Tu peux corriger le résultat si la photographie est inversée.&#x27;;$(&#x27;thumbHelp&#x27;).style.fontWeight=&#x27;normal&#x27;;status(&#x27;Main identifiée : &#x27;+($(&#x27;hand&#x27;).value===&#x27;right&#x27;?&#x27;droite&#x27;:&#x27;gauche&#x27;)+&#x27;. Tu peux tracer les lignes.&#x27;);},true);
 $(&#x27;overlay&#x27;).addEventListener(&#x27;pointerdown&#x27;,e=&gt;{if(!imageData||mode!==&#x27;lines&#x27;||drag||e.target.closest(&#x27;.mount&#x27;))return;if(lines[$(&#x27;lineChoice&#x27;).value]?.validated){status(&#x27;Cette ligne est déjà validée. Pour la retracer, clique d’abord sur « Effacer cette ligne ».&#x27;);return}e.preventDefault();draw={id:$(&#x27;lineChoice&#x27;).value,pointer:e.pointerId};draft=[pt(e)];$(&#x27;overlay&#x27;).setPointerCapture(e.pointerId)});
@@ -95,7 +95,7 @@ $(&#x27;validate&#x27;).onclick=()=&gt;{
  if(remaining.length===0){
   // Protection : aucun nouveau tracé ne peut être dessiné par inadvertance.
   setMode(&#x27;mounts&#x27;);
-  renderLines();analyze();
+  or149Panels(&#x27;mounts&#x27;);renderLines();analyze();
   status(&#x27;Les 4 lignes sont validées. Mode « Placer les monts » activé automatiquement : tu peux maintenant déplacer les cercles.&#x27;);
  }else{
   $(&#x27;lineChoice&#x27;).value=remaining[0];
@@ -106,8 +106,42 @@ $(&#x27;validate&#x27;).onclick=()=&gt;{
 $(&#x27;redo&#x27;).onclick=()=&gt;{delete lines[$(&#x27;lineChoice&#x27;).value];draft=null;renderLines();analyze()};$(&#x27;lineChoice&#x27;).onchange=()=&gt;{draft=null;renderLines()};
 $(&#x27;notes&#x27;).oninput=e=&gt;mounts[selected].notes=e.target.value;$(&#x27;showlines&#x27;).onchange=renderLines;$(&#x27;showmounts&#x27;).onchange=renderMounts;
 function status(s){$(&#x27;status&#x27;).textContent=s}
-function setMode(m){mode=m;$(&#x27;modeLines&#x27;).className=&#x27;btn&#x27;+(m===&#x27;lines&#x27;?&#x27;&#x27;:&#x27; secondary&#x27;);$(&#x27;modeMounts&#x27;).className=&#x27;btn&#x27;+(m===&#x27;mounts&#x27;?&#x27;&#x27;:&#x27; secondary&#x27;);$(&#x27;modeHint&#x27;).textContent=m===&#x27;lines&#x27;?&#x27;Mode tracé : choisis une ligne dans l’étape 2, puis dessine directement sur la photographie.&#x27;:&#x27;Mode monts : déplace les cercles sur la photographie et renseigne leur relief à l’étape 3.&#x27;;renderMounts();lineStatus()}
-$(&#x27;modeLines&#x27;).onclick=()=&gt;setMode(&#x27;lines&#x27;);$(&#x27;modeMounts&#x27;).onclick=()=&gt;setMode(&#x27;mounts&#x27;);
+function or149Panels(m){
+ const linePanel=document.querySelector(&#x27;.or-photo-validation&#x27;);
+ const photo=document.getElementById(&#x27;modeHint&#x27;);
+ if(!linePanel||!photo)return;
+ let mountPanel=document.getElementById(&#x27;or149MountPanel&#x27;);
+ if(!mountPanel){
+   mountPanel=document.createElement(&#x27;div&#x27;);mountPanel.id=&#x27;or149MountPanel&#x27;;
+   mountPanel.className=&#x27;or-photo-validation&#x27;;
+   mountPanel.style.cssText=&#x27;margin-top:12px;padding:12px;border:1px solid #d9e3ed;border-radius:10px;background:#f0f5f9&#x27;;
+   const heading=document.createElement(&#x27;b&#x27;);heading.textContent=&#x27;Évaluation des huit monts&#x27;;mountPanel.appendChild(heading);
+   const hint=document.createElement(&#x27;p&#x27;);hint.className=&#x27;hint&#x27;;hint.textContent=&#x27;Déplace les cercles sur ta photographie, puis indique ici le relief de chaque mont.&#x27;;mountPanel.appendChild(hint);
+   for(const id of [&#x27;mountbuttons&#x27;,&#x27;notes&#x27;,&#x27;mountProgress&#x27;]){
+     const el=document.getElementById(id);if(!el)continue;
+     if(id===&#x27;notes&#x27; &amp;&amp; el.parentElement &amp;&amp; el.parentElement.classList.contains(&#x27;mountrow&#x27;))mountPanel.appendChild(el.parentElement);
+     else mountPanel.appendChild(el);
+   }
+   linePanel.parentElement.insertBefore(mountPanel,linePanel.nextSibling);
+ }
+ linePanel.style.display=m===&#x27;lines&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
+ mountPanel.style.display=m===&#x27;mounts&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
+ const lineStage=document.getElementById(&#x27;lineStage&#x27;);
+ const mountStage=document.getElementById(&#x27;mountStage&#x27;);
+ // Show only the matching reference illustration while retaining existing data and handlers.
+ const lineGuide=Array.from(document.querySelectorAll(&#x27;details.guide&#x27;)).find(e=&gt;e.querySelector(&#x27;summary&#x27;)?.textContent.includes(&#x27;quatre lignes&#x27;));
+ const mountGuide=Array.from(document.querySelectorAll(&#x27;details.guide&#x27;)).find(e=&gt;e.querySelector(&#x27;summary&#x27;)?.textContent.includes(&#x27;huit monts&#x27;));
+ if(lineGuide)lineGuide.style.display=m===&#x27;lines&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
+ if(mountGuide)mountGuide.style.display=m===&#x27;mounts&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
+ // Reference diagrams only: mirror for left hand, preserving the uploaded photo and drawn coordinates.
+ const isLeft=document.getElementById(&#x27;hand&#x27;)?.value===&#x27;left&#x27;;
+ for(const guide of [lineGuide,mountGuide])if(guide){
+   guide.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=>{el.style.transform=isLeft?&#x27;scaleX(-1)&#x27;:&#x27;&#x27;;});
+ }
+
+}
+function setMode(m){mode=m;or149Panels(m);$(&#x27;modeLines&#x27;).className=&#x27;btn&#x27;+(m===&#x27;lines&#x27;?&#x27;&#x27;:&#x27; secondary&#x27;);$(&#x27;modeMounts&#x27;).className=&#x27;btn&#x27;+(m===&#x27;mounts&#x27;?&#x27;&#x27;:&#x27; secondary&#x27;);$(&#x27;modeHint&#x27;).textContent=m===&#x27;lines&#x27;?&#x27;Mode tracé : choisis une ligne dans l’étape 2, puis dessine directement sur la photographie.&#x27;:&#x27;Mode monts : déplace les cercles sur la photographie et renseigne leur relief à l’étape 3.&#x27;;renderMounts();lineStatus()}
+or149Panels(mode);$(&#x27;modeLines&#x27;).onclick=()=&gt;setMode(&#x27;lines&#x27;);$(&#x27;modeMounts&#x27;).onclick=()=&gt;setMode(&#x27;mounts&#x27;);
 
 function loadImage(data,cb){const im=new Image();im.onload=()=&gt;{imageData=data;iw=im.naturalWidth;ih=im.naturalHeight;$(&#x27;photoimg&#x27;).src=data;$(&#x27;photoimg&#x27;).style.display=&#x27;block&#x27;;$(&#x27;emptymsg&#x27;).style.display=&#x27;none&#x27;;$(&#x27;photo&#x27;).classList.remove(&#x27;empty&#x27;);renderLines();renderMounts();analyze();if(cb)cb()};im.onerror=()=&gt;status(&#x27;Impossible de lire cette image.&#x27;);im.src=data}
 $(&#x27;file&#x27;).onchange=e=&gt;{const f=e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=()=&gt;{lines={};initMounts();$(&#x27;birthDate&#x27;).value=&#x27;&#x27;;$(&#x27;forecastStart&#x27;).value=localISO(new Date());loadImage(reader.result,()=&gt;{thumbPicking=false;$(&#x27;hand&#x27;).value=&#x27;unknown&#x27;;handLabel();select(&#x27;venus&#x27;);setMode(&#x27;lines&#x27;);status(&#x27;Photographie chargée. Identifie le pouce, puis trace les lignes.&#x27;)})};reader.readAsDataURL(f)};
@@ -254,7 +288,7 @@ function updateMountProgress(){if($(&#x27;mountProgress&#x27;))$(&#x27;mountProg
 function buttons(){const c=$(&#x27;mountbuttons&#x27;);c.replaceChildren();for(const d of defs){const m=mounts[d.id],card=document.createElement(&#x27;div&#x27;);card.className=&#x27;mountcard&#x27;+(d.id===selected?&#x27; active&#x27;:&#x27;&#x27;)+(m.rating!==&#x27;unknown&#x27;?&#x27; completed&#x27;:&#x27;&#x27;);const heading=document.createElement(&#x27;button&#x27;);heading.type=&#x27;button&#x27;;heading.className=&#x27;mountheading&#x27;;heading.innerHTML=&#x27;&lt;span style=&quot;color:&#x27;+d.color+&#x27;&quot;&gt;●&lt;/span&gt; &#x27;+d.name+&#x27;&lt;small&gt;&#x27;+d.sub+&#x27;&lt;/small&gt;&#x27;;heading.onclick=()=&gt;{select(d.id);setMode(&#x27;mounts&#x27;)};const sel=document.createElement(&#x27;select&#x27;);sel.setAttribute(&#x27;aria-label&#x27;,&#x27;Relief du mont de &#x27;+d.name);for(const [val,lab] of [[&#x27;unknown&#x27;,&#x27;Indéterminé / non évalué&#x27;],[&#x27;low&#x27;,&#x27;Peu marqué&#x27;],[&#x27;medium&#x27;,&#x27;Moyen&#x27;],[&#x27;high&#x27;,&#x27;Prononcé&#x27;]]){const o=document.createElement(&#x27;option&#x27;);o.value=val;o.textContent=lab;sel.appendChild(o)}sel.value=m.rating;sel.onchange=e=&gt;{mounts[d.id].rating=e.target.value;selected=d.id;buttons();renderMounts();updateMountProgress();analyze()};card.append(heading,sel);c.appendChild(card)}}
 function select(id){selected=id;const d=defs.find(v=&gt;v.id===id);$(&#x27;notes&#x27;).value=mounts[id].notes;renderMounts();buttons();updateMountProgress()}
 function handLabel(){const v=$(&#x27;hand&#x27;).value;$(&#x27;handResult&#x27;).textContent=v===&#x27;right&#x27;?&#x27;Main droite ✓&#x27;:v===&#x27;left&#x27;?&#x27;Main gauche ✓&#x27;:&#x27;À déterminer&#x27;}
-$(&#x27;hand&#x27;).addEventListener(&#x27;change&#x27;,()=&gt;{handLabel();if(!Object.values(lines).some(v=&gt;v.validated)&amp;&amp;Object.values(mounts).every(v=&gt;v.rating===&#x27;unknown&#x27;)){initMounts();renderMounts();}});
+$(&#x27;hand&#x27;).addEventListener(&#x27;change&#x27;,()=&gt;{handLabel();or149Panels(mode);if(!Object.values(lines).some(v=&gt;v.validated)&amp;&amp;Object.values(mounts).every(v=&gt;v.rating===&#x27;unknown&#x27;)){initMounts();renderMounts();}});
 $(&#x27;thumbIdentify&#x27;).onclick=()=&gt;{if(!imageData){status(&#x27;Charge une photographie avant de repérer le pouce.&#x27;);return}thumbPicking=true;setMode(&#x27;lines&#x27;);$(&#x27;thumbHelp&#x27;).textContent=&#x27;Clique maintenant directement sur le POUCE de la photographie à gauche (pas sur un mont).&#x27;;$(&#x27;thumbHelp&#x27;).style.fontWeight=&#x27;bold&#x27;;status(&#x27;Clique sur le pouce visible dans la photographie.&#x27;);};
 $(&#x27;overlay&#x27;).addEventListener(&#x27;pointerdown&#x27;,e=&gt;{if(!thumbPicking)return;e.preventDefault();e.stopImmediatePropagation();const p=pt(e);$(&#x27;hand&#x27;).value=p.x&gt;=384?&#x27;right&#x27;:&#x27;left&#x27;;thumbPicking=false;handLabel();$(&#x27;thumbHelp&#x27;).textContent=&#x27;Main déterminée à partir du côté du pouce. Tu peux corriger le résultat si la photographie est inversée.&#x27;;$(&#x27;thumbHelp&#x27;).style.fontWeight=&#x27;normal&#x27;;status(&#x27;Main identifiée : &#x27;+($(&#x27;hand&#x27;).value===&#x27;right&#x27;?&#x27;droite&#x27;:&#x27;gauche&#x27;)+&#x27;. Tu peux tracer les lignes.&#x27;);},true);
 $(&#x27;overlay&#x27;).addEventListener(&#x27;pointerdown&#x27;,e=&gt;{if(!imageData||mode!==&#x27;lines&#x27;||drag||e.target.closest(&#x27;.mount&#x27;))return;if(lines[$(&#x27;lineChoice&#x27;).value]?.validated){status(&#x27;Cette ligne est déjà validée. Pour la retracer, clique d’abord sur « Effacer cette ligne ».&#x27;);return}e.preventDefault();draw={id:$(&#x27;lineChoice&#x27;).value,pointer:e.pointerId};draft=[pt(e)];$(&#x27;overlay&#x27;).setPointerCapture(e.pointerId)});
@@ -270,7 +304,7 @@ $(&#x27;validate&#x27;).onclick=()=&gt;{
  if(remaining.length===0){
   // Protection : aucun nouveau tracé ne peut être dessiné par inadvertance.
   setMode(&#x27;mounts&#x27;);
-  renderLines();analyze();
+  or149Panels(&#x27;mounts&#x27;);renderLines();analyze();
   status(&#x27;Les 4 lignes sont validées. Mode « Placer les monts » activé automatiquement : tu peux maintenant déplacer les cercles.&#x27;);
  }else{
   $(&#x27;lineChoice&#x27;).value=remaining[0];
@@ -308,6 +342,12 @@ function or149Panels(m){
  const mountGuide=Array.from(document.querySelectorAll(&#x27;details.guide&#x27;)).find(e=&gt;e.querySelector(&#x27;summary&#x27;)?.textContent.includes(&#x27;huit monts&#x27;));
  if(lineGuide)lineGuide.style.display=m===&#x27;lines&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
  if(mountGuide)mountGuide.style.display=m===&#x27;mounts&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
+ // Reference diagrams only: mirror for left hand, preserving the uploaded photo and drawn coordinates.
+ const isLeft=document.getElementById(&#x27;hand&#x27;)?.value===&#x27;left&#x27;;
+ for(const guide of [lineGuide,mountGuide])if(guide){
+   guide.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=>{el.style.transform=isLeft?&#x27;scaleX(-1)&#x27;:&#x27;&#x27;;});
+ }
+
 }
 function setMode(m){mode=m;or149Panels(m);$(&#x27;modeLines&#x27;).className=&#x27;btn&#x27;+(m===&#x27;lines&#x27;?&#x27;&#x27;:&#x27; secondary&#x27;);$(&#x27;modeMounts&#x27;).className=&#x27;btn&#x27;+(m===&#x27;mounts&#x27;?&#x27;&#x27;:&#x27; secondary&#x27;);$(&#x27;modeHint&#x27;).textContent=m===&#x27;lines&#x27;?&#x27;Mode tracé : choisis une ligne dans l’étape 2, puis dessine directement sur la photographie.&#x27;:&#x27;Mode monts : déplace les cercles sur la photographie et renseigne leur relief à l’étape 3.&#x27;;renderMounts();lineStatus()}
 or149Panels(mode);$(&#x27;modeLines&#x27;).onclick=()=&gt;setMode(&#x27;lines&#x27;);$(&#x27;modeMounts&#x27;).onclick=()=&gt;setMode(&#x27;mounts&#x27;);
