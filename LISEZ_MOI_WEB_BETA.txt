@@ -1,0 +1,18 @@
+ORACLIA v14.9 — WEB BÊTA POUR GITHUB PAGES
+
+Cette archive est une édition web STATIQUE distincte de la version locale Windows.
+
+Publication :
+1. Créez un dépôt GitHub nommé oraclia.
+2. Téléversez le CONTENU de ce ZIP à la racine du dépôt (index.html, accueil.html, application/, tarot/).
+3. Settings > Pages > Deploy from a branch > main > /(root) > Save.
+4. Attendez le déploiement et ouvrez https://VOTRE-IDENTIFIANT.github.io/oraclia/
+
+Restrictions :
+- Les laboratoires PalmScan ne sont PAS publiés ; ils restent dans votre ZIP local v14.9.
+- L'appel /api/interpret est désactivé : GitHub Pages n'exécute pas de Python.
+- Aucun système de comptes ou de protection par mot de passe. L'URL est publique.
+- Les dossiers et photos des mains sont sensibles. Ne publiez jamais les JSON de vos proches dans le dépôt.
+- Les fonctions d'import/export et de stockage doivent être testées sur le site réel.
+- Testez ordinateur, tablette et téléphone avant diffusion.
+- Le code HTML original est conservé hormis la désactivation de l'appel API.

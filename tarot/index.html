@@ -1,0 +1,99 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ORACLIA — Tarot symbolique</title>
+<style>
+:root{font-family:system-ui,Arial,sans-serif;color:#2d2640;background:#f7f5fa}
+*{box-sizing:border-box}body{margin:0}header{background:linear-gradient(120deg,#352448,#69528c);color:#fff;padding:23px max(22px,4vw)}
+h1{margin:0 0 5px;font-size:28px}header p{margin:0;opacity:.85}
+main{max-width:1120px;margin:auto;padding:24px 18px 45px}
+.panel{background:#fff;border:1px solid #ddd7e6;border-radius:15px;padding:20px;margin-bottom:17px}
+h2{font-size:19px;margin:0 0 12px}p{line-height:1.5}
+label{display:block;font-weight:650;margin:12px 0 5px}input,select,textarea{width:100%;padding:11px;border:1px solid #bcb3c9;border-radius:9px;font:inherit;background:white;color:#2d2640}
+textarea{min-height:76px;resize:vertical}button{font:inherit;border:0;border-radius:10px;background:#513a73;color:#fff;padding:12px 17px;cursor:pointer;margin:7px 7px 5px 0}
+button.secondary{background:#eeeaf3;color:#3b2d52}button:disabled{opacity:.5;cursor:not-allowed}
+#spread{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+.card{min-height:235px;border:2px solid #d5c8e5;border-radius:13px;background:linear-gradient(160deg,#fffaf0,#eee5f6);padding:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
+.card.back{background:repeating-linear-gradient(45deg,#3f3158,#3f3158 10px,#513e70 10px,#513e70 20px);color:white}
+.symbol{font-size:37px}.num{font-size:13px;color:#6c5b80}.name{font-weight:750;font-size:20px}.position{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.card.back .num{color:#eee}
+.card{padding:10px;justify-content:flex-start}
+.card img{width:100%;max-width:245px;aspect-ratio:3/5;object-fit:contain;border-radius:9px;filter:drop-shadow(0 5px 7px #38274844)}
+.card .position{margin:3px 0 8px}
+.card .name{font-size:16px}
+.verdict{border-left:5px solid #69528c;background:#f5f0fb;padding:15px 18px;border-radius:9px;margin:16px 0}
+.verdict h3{margin:5px 0 10px;font-size:21px}
+.verdict .kicker{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#675279;font-weight:800}
+
+#reading{display:none}#reading section{border-top:1px solid #e5deed;padding:12px 0}
+#reading section:first-child{border:0}.muted{color:#655b70;font-size:14px}.note{background:#f6f2fa;padding:12px;border-radius:9px}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+@media(max-width:650px){#spread{grid-template-columns:1fr}.card{min-height:140px}}
+@media print{header,.controls,.toolbar{display:none!important}main{padding:0}.panel{border:0}}
+</style></head><body><header><h1>ORACLIA · Tarot</h1><p>Découverte symbolique — tirage libre et lecture personnalisée</p></header>
+<main>
+<div class="panel controls"><h2>Préparer ton tirage</h2>
+<label for="question">Ta question ou ton thème (facultatif)</label><textarea id="question" maxlength="800" placeholder="Ex. : Qu'est-ce qui mérite mon attention dans mon projet ?"></textarea>
+<label for="domain">Domaine</label><select id="domain"><option value="general">Vue d'ensemble</option><option value="relations">Relations</option><option value="projects">Projets et activité</option><option value="choices">Choix et décisions</option><option value="growth">Évolution personnelle</option></select>
+<label for="layout">Tirage</label><select id="layout"><option value="one">1 carte — éclairage du moment</option><option value="three" selected>3 cartes — situation, tension, piste d'action</option></select>
+<div class="toolbar"><button id="draw">Mélanger et tirer</button><button class="secondary" id="reset">Recommencer</button></div>
+<p class="muted">Jeu de 22 arcanes majeurs, avec illustrations originales inspirées de la tradition du tarot de Marseille. Cartes tirées sans remise, dans le navigateur. Les interprétations sont symboliques, pas des prédictions factuelles.</p></div>
+<div class="panel"><h2>Les cartes</h2><div id="spread" aria-live="polite"><div class="card back">✦<br>Choisis un tirage</div></div></div>
+<div class="panel" id="reading" aria-live="polite"><h2>Interprétation assumée du tirage</h2><div id="result"></div><div class="toolbar"><button id="save">Exporter ce tirage (JSON)</button><button class="secondary" id="print">Imprimer la lecture</button></div></div>
+<div class="panel"><h2>Comment utiliser cette lecture ?</h2><p>Les cartes proposent des thèmes de réflexion. Tu peux les rapprocher de tes observations personnelles, mais elles ne permettent pas de connaître l'avenir, les intentions d'une autre personne ou l'issue d'un événement.</p><p class="muted">Ce module fonctionne localement et indépendamment des données de chiromancie et de numérologie. Aucun croisement automatique avec les autres méthodes n'est encore réalisé.</p></div>
+</main><script>
+const cards=[{"number": "—", "name": "Le Mat", "theme": "élan libre", "advice": "explorer une possibilité sans négliger les conséquences", "caution": "dispersion et impulsivité"}, {"number": "1", "name": "Le Bateleur", "theme": "initiative", "advice": "commencer avec les ressources disponibles", "caution": "promesses sans suite"}, {"number": "2", "name": "La Papesse", "theme": "introspection", "advice": "observer et approfondir avant de décider", "caution": "repli ou informations manquantes"}, {"number": "3", "name": "L'Impératrice", "theme": "créativité", "advice": "donner forme à une idée et la communiquer", "caution": "agitation intellectuelle"}, {"number": "4", "name": "L'Empereur", "theme": "structure", "advice": "poser un cadre et des limites claires", "caution": "rigidité"}, {"number": "5", "name": "Le Pape", "theme": "transmission", "advice": "solliciter un conseil ou partager un savoir", "caution": "conformisme"}, {"number": "6", "name": "L'Amoureux", "theme": "choix", "advice": "clarifier ses valeurs et ses priorités", "caution": "indécision"}, {"number": "7", "name": "Le Chariot", "theme": "direction", "advice": "avancer avec méthode vers un objectif", "caution": "précipitation"}, {"number": "8", "name": "La Justice", "theme": "équilibre", "advice": "examiner les faits et les engagements", "caution": "jugement hâtif"}, {"number": "9", "name": "L'Hermite", "theme": "recul", "advice": "prendre le temps de comprendre", "caution": "isolement"}, {"number": "10", "name": "La Roue de Fortune", "theme": "changement", "advice": "s'adapter à une situation mouvante", "caution": "passivité devant l'incertitude"}, {"number": "11", "name": "La Force", "theme": "maîtrise", "advice": "mobiliser sa patience et son courage", "caution": "rapport de force"}, {"number": "12", "name": "Le Pendu", "theme": "perspective", "advice": "changer d'angle avant d'agir", "caution": "immobilisme"}, {"number": "13", "name": "L'Arcane sans nom", "theme": "transformation", "advice": "laisser derrière soi ce qui ne sert plus", "caution": "rupture précipitée"}, {"number": "14", "name": "Tempérance", "theme": "ajustement", "advice": "chercher une voie progressive et mesurée", "caution": "compromis excessif"}, {"number": "15", "name": "Le Diable", "theme": "attachement", "advice": "interroger les dépendances et les désirs", "caution": "excès ou emprise"}, {"number": "16", "name": "La Maison Dieu", "theme": "remise en question", "advice": "revoir une structure devenue fragile", "caution": "réaction brutale"}, {"number": "17", "name": "L'Étoile", "theme": "confiance", "advice": "cultiver une direction porteuse de sens", "caution": "idéalisme"}, {"number": "18", "name": "La Lune", "theme": "ambiguïté", "advice": "distinguer intuition et faits vérifiables", "caution": "projection ou confusion"}, {"number": "19", "name": "Le Soleil", "theme": "clarté", "advice": "favoriser la coopération et la transparence", "caution": "excès de certitude"}, {"number": "20", "name": "Le Jugement", "theme": "prise de conscience", "advice": "réévaluer la situation à la lumière d'éléments nouveaux", "caution": "précipitation dans les conclusions"}, {"number": "21", "name": "Le Monde", "theme": "accomplissement", "advice": "faire le bilan et envisager la suite", "caution": "satisfaction prématurée"}];
+const weights=[0,2,0,2,1,1,0,2,0,-1,1,2,-1,-2,1,-2,-2,2,-1,3,2,3];
+const $=id=>document.getElementById(id);
+let last=null;
+const positions={one:["Éclairage"],three:["Situation","Tension","Piste d'action"]};
+function choose(n){const a=cards.map((_,i)=>i);for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a.slice(0,n)}
+function clean(t){return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){if(!last)return;const pos=positions[last.layout];
+$('spread').innerHTML=last.indices.map((idx,i)=>{const c=cards[idx];return `<div class="card"><span class="position">${pos[i]}</span><img src="cartes/${String(idx).padStart(2,"0")}.png" alt="Illustration de ${clean(c.name)}" loading="lazy"><span class="num">Arcane ${c.number}</span><span class="name">${clean(c.name)}</span><span>${clean(c.theme)}</span></div>`}).join('');
+const domainNames={general:"la situation dans son ensemble",relations:"tes relations",projects:"tes projets",choices:"tes décisions",growth:"ton évolution personnelle"};
+let out=`<p><b>Thème :</b> ${clean(domainNames[last.domain])}${last.question?`<br><b>Ta question :</b> ${clean(last.question)}`:""}</p>`;
+last.indices.forEach((idx,i)=>{const c=cards[idx];const isTension=last.layout==="three"&&i===1;
+out+=`<section><h3>${pos[i]} · ${clean(c.name)}</h3><p><b>Thème :</b> ${clean(c.theme)}. ${isTension?"Cette position invite à examiner un obstacle possible, sans affirmer qu'il existe.":"Cette carte invite à explorer ce thème dans ta situation."}</p><p><b>Piste concrète :</b> ${clean(c.advice)}.</p><p><b>Point de vigilance :</b> ${clean(c.caution)}.</p></section>`});
+const chosen=last.indices.map(i=>cards[i]);
+const domainAdvice={
+ general:"Concentre-toi sur une activité où tu peux obtenir un retour vérifiable, et fixe-toi une date pour faire le point.",
+ relations:"Privilégie un échange direct plutôt que de déduire les intentions d'autrui du tirage.",
+ projects:"Relance une démarche précise ou change un canal de présentation; mesure les retours réels.",
+ choices:"Définis une échéance et compare les options à partir de leurs conséquences concrètes.",
+ growth:"Choisis une habitude à modifier pendant deux semaines et observe ce qui change."
+};
+const question=last.question.trim();
+const lower=question.toLocaleLowerCase("fr");
+const timing=/bient[oô]t|prochain|quand|rapid|imminent|cette semaine|ce mois/.test(lower);
+const good=/bonne nouvelle|réuss|succès|publ|accept|accord|positif|gagn|aboutir|réponse favorable|amour/.test(lower);
+const wait=/attend|attente|désesp|espèr|espér|patien/.test(lower);
+const sum=last.indices.reduce((n,i,k)=>n+weights[i]*(last.layout==="three"&&k===2?1.15:1),0);
+const hard=last.indices.some(i=>[13,15,16].includes(i));
+const slow=last.indices.some(i=>[9,12].includes(i));
+const strong=last.indices.some(i=>[17,19,20,21].includes(i));
+let verdict,position;
+if(sum>=3){verdict="Tendance symbolique favorable";position="Les cartes penchent vers une ouverture ou une évolution constructive."}
+else if(sum<=-3){verdict="Tendance symbolique défavorable à court terme";position="Les cartes mettent davantage l'accent sur les obstacles et les remises en question que sur une issue facile."}
+else {verdict="Tendance symbolique mitigée";position="Les cartes ne vont pas toutes dans le même sens : une évolution semble possible, mais sans voie simple."}
+if(hard&&slow&&sum<1){verdict="Une attente qui appelle un changement";position="Ce tirage ne penche pas vers une bonne nouvelle rapide : il insiste sur un cycle à transformer et sur une attente qui risque de peser."}
+if(timing&&slow)position+=" La présence d'une carte de lenteur invite particulièrement à ne pas miser sur l'imminence.";
+if(good&&sum>=3)position+=" Dans le langage du tarot, la lecture est plutôt encourageante pour la question posée.";
+if(good&&sum<=-3)position+=" Pour la question posée, la lecture est donc plutôt réservée.";
+if(wait&&hard)position+=" L'attachement à un résultat attendu apparaît comme un thème central du tirage.";
+let summary;
+if(last.layout==="three"){
+ const [a,b,c]=chosen;
+ summary=`<b>${clean(a.name)}</b> ouvre la lecture sur ${clean(a.theme)}. <b>${clean(b.name)}</b> situe la difficulté autour de ${clean(b.theme)}. <b>${clean(c.name)}</b> oriente la suite vers ${clean(c.theme)} : ${clean(c.advice)}.`;
+}else{
+ const a=chosen[0];
+ summary=`<b>${clean(a.name)}</b> domine la lecture : ${clean(a.theme)}. La piste d'action est de ${clean(a.advice)}.`;
+}
+const intro=question?`<p><b>Réponse à « ${clean(question)} » :</b> ${position}</p>`:`<p>${position}</p>`;
+out+=`<div class="verdict"><div class="kicker">Prise de position du tirage</div><h3>${verdict}</h3>${intro}<p>${summary}</p><p><b>Mon conseil :</b> ${domainAdvice[last.domain]}</p></div>`;
+const questionAdvice="Ce verdict est une interprétation assumée des symboles tirés, pas une estimation fiable des chances de réussite ou de la date d'un événement.";
+out+=`<p class="note"><b>En synthèse :</b> ${summary}<br><br><b>Ce que tu peux en faire :</b> ${questionAdvice}<br><br><span class="muted">ORACLIA prend position sur les symboles, mais ne prédit pas les événements.</span></p><p class="muted">Tirage du ${new Date(last.timestamp).toLocaleString('fr-FR')}. Lecture symbolique, non prédictive.</p>`;
+$('result').innerHTML=out;$('reading').style.display="block"}
+$('draw').onclick=()=>{const layout=$('layout').value;last={application:"ORACLIA",module:"tarot",version:"1.1",deck:"22 arcanes majeurs",layout,domain:$('domain').value,question:$('question').value.trim(),indices:choose(layout==="one"?1:3),timestamp:new Date().toISOString()};render()};
+$('reset').onclick=()=>{last=null;$('spread').innerHTML='<div class="card back">✦<br>Choisis un tirage</div>';$('reading').style.display="none"};
+$('save').onclick=()=>{if(!last)return;const exportData={...last,cards:last.indices.map(i=>cards[i]),disclaimer:"Lecture symbolique, non prédictive."};const blob=new Blob([JSON.stringify(exportData,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="ORACLIA_tirage_tarot_"+last.timestamp.slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)};
+$('print').onclick=()=>window.print();
+</script></body></html>
