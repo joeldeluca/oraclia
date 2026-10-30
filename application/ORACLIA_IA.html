@@ -78,6 +78,7 @@ function renderMounts(){const g=$(&#x27;mounts&#x27;);g.replaceChildren();if(!im
 function updateMountProgress(){if($(&#x27;mountProgress&#x27;))$(&#x27;mountProgress&#x27;).textContent=defs.filter(d=&gt;mounts[d.id].rating!==&#x27;unknown&#x27;).length+&#x27; mont(s) évalué(s) sur 8. « Indéterminé » reste possible.&#x27;}
 function buttons(){const c=$(&#x27;mountbuttons&#x27;);c.replaceChildren();for(const d of defs){const m=mounts[d.id],card=document.createElement(&#x27;div&#x27;);card.className=&#x27;mountcard&#x27;+(d.id===selected?&#x27; active&#x27;:&#x27;&#x27;)+(m.rating!==&#x27;unknown&#x27;?&#x27; completed&#x27;:&#x27;&#x27;);const heading=document.createElement(&#x27;button&#x27;);heading.type=&#x27;button&#x27;;heading.className=&#x27;mountheading&#x27;;heading.innerHTML=&#x27;&lt;span style=&quot;color:&#x27;+d.color+&#x27;&quot;&gt;●&lt;/span&gt; &#x27;+d.name+&#x27;&lt;small&gt;&#x27;+d.sub+&#x27;&lt;/small&gt;&#x27;;heading.onclick=()=&gt;{select(d.id);setMode(&#x27;mounts&#x27;)};const sel=document.createElement(&#x27;select&#x27;);sel.setAttribute(&#x27;aria-label&#x27;,&#x27;Relief du mont de &#x27;+d.name);for(const [val,lab] of [[&#x27;unknown&#x27;,&#x27;Indéterminé / non évalué&#x27;],[&#x27;low&#x27;,&#x27;Peu marqué&#x27;],[&#x27;medium&#x27;,&#x27;Moyen&#x27;],[&#x27;high&#x27;,&#x27;Prononcé&#x27;]]){const o=document.createElement(&#x27;option&#x27;);o.value=val;o.textContent=lab;sel.appendChild(o)}sel.value=m.rating;sel.onchange=e=&gt;{mounts[d.id].rating=e.target.value;selected=d.id;buttons();renderMounts();updateMountProgress();analyze()};card.append(heading,sel);c.appendChild(card)}}
 function select(id){selected=id;const d=defs.find(v=&gt;v.id===id);$(&#x27;notes&#x27;).value=mounts[id].notes;renderMounts();buttons();updateMountProgress()}
+if(document.getElementById(&#x27;hand&#x27;)) document.getElementById(&#x27;hand&#x27;).value=&#x27;right&#x27;;
 function handLabel(){const v=$(&#x27;hand&#x27;).value;$(&#x27;handResult&#x27;).textContent=v===&#x27;right&#x27;?&#x27;Main droite ✓&#x27;:v===&#x27;left&#x27;?&#x27;Main gauche ✓&#x27;:&#x27;À déterminer&#x27;}
 $(&#x27;hand&#x27;).addEventListener(&#x27;change&#x27;,()=&gt;{handLabel();or149Panels(mode);if(!Object.values(lines).some(v=&gt;v.validated)&amp;&amp;Object.values(mounts).every(v=&gt;v.rating===&#x27;unknown&#x27;)){initMounts();renderMounts();}});
 $(&#x27;thumbIdentify&#x27;).onclick=()=&gt;{if(!imageData){status(&#x27;Charge une photographie avant de repérer le pouce.&#x27;);return}thumbPicking=true;setMode(&#x27;lines&#x27;);$(&#x27;thumbHelp&#x27;).textContent=&#x27;Clique maintenant directement sur le POUCE de la photographie à gauche (pas sur un mont).&#x27;;$(&#x27;thumbHelp&#x27;).style.fontWeight=&#x27;bold&#x27;;status(&#x27;Clique sur le pouce visible dans la photographie.&#x27;);};
@@ -134,7 +135,7 @@ function or149Panels(m){
  if(lineGuide)lineGuide.style.display=m===&#x27;lines&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
  if(mountGuide)mountGuide.style.display=m===&#x27;mounts&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
  // Reference diagrams only: mirror for left hand, preserving the uploaded photo and drawn coordinates.
- const selectedSide=document.getElementById(&#x27;hand&#x27;)?.value || (window.frameElement?.id===&#x27;palmFrameLeft&#x27;?&#x27;left&#x27;:&#x27;right&#x27;);
+ const selectedSide=(document.getElementById(&#x27;hand&#x27;)?.value === &#x27;left&#x27; || document.getElementById(&#x27;hand&#x27;)?.value === &#x27;right&#x27;) ? document.getElementById(&#x27;hand&#x27;).value : &#x27;right&#x27;;
  for(const [guide,referenceSide] of [[lineGuide,&#x27;right&#x27;],[mountGuide,&#x27;left&#x27;]])if(guide){
    guide.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=&gt;{el.style.transform=selectedSide!==referenceSide?&#x27;scaleX(-1)&#x27;:&#x27;none&#x27;;});
  }
@@ -266,12 +267,7 @@ const lineGuide=guides.find(g=&gt;/quatre lignes/i.test(g.querySelector(&#x27;su
 const mountGuide=guides.find(g=&gt;/monts/i.test(g.querySelector(&#x27;summary&#x27;)?.textContent||&#x27;&#x27;));
 let stage=&#x27;lines&#x27;;
 function update(){
-  // Each embedded module has a fixed hand side, selected in the parent interface.
-  let side=hand?.value;
-  try {
-    if(window.frameElement?.id===&#x27;palmFrameLeft&#x27;) side=&#x27;left&#x27;;
-    else if(window.frameElement?.id===&#x27;palmFrame&#x27;) side=&#x27;right&#x27;;
-  } catch(e) {}
+  const side=hand?.value;
   const hasPhoto=!!(photo &amp;&amp; photo.getAttribute(&#x27;src&#x27;) &amp;&amp; photo.getAttribute(&#x27;src&#x27;).startsWith(&#x27;data:image/&#x27;));
   const ready=hasPhoto &amp;&amp; (side===&#x27;left&#x27;||side===&#x27;right&#x27;);
   guides.forEach(g=&gt;{g.style.setProperty(&#x27;display&#x27;,&#x27;none&#x27;,&#x27;important&#x27;);g.open=false;});
@@ -296,7 +292,7 @@ window.addEventListener(&#x27;load&#x27;,update);
 window.addEventListener(&#x27;pageshow&#x27;,update);
 update();
 })();
-&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" title="Module guidé de chiromancie"></iframe><iframe id="palmFrameLeft" loading="eager" srcdoc="&lt;!doctype html&gt;&lt;html lang=&quot;fr&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;ORACLIA — Étude guidée d’une nouvelle main&lt;/title&gt;&lt;style&gt;
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;&quot; title=&quot;Module guidé de chiromancie"></iframe><iframe id="palmFrameLeft" loading="eager" srcdoc="&lt;!doctype html&gt;&lt;html lang=&quot;fr&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;ORACLIA — Étude guidée d’une nouvelle main&lt;/title&gt;&lt;style&gt;
 html{scroll-behavior:smooth} .or-nav{position:sticky;top:0;z-index:90;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:11px 14px;background:#fff;border-bottom:1px solid #d3dce6;box-shadow:0 2px 8px #00000012;font:600 13px system-ui,sans-serif}.or-nav a{color:#214767;background:#edf2f7;border-radius:7px;padding:9px 12px;text-decoration:none}.or-nav a:hover,.or-nav a:focus{background:#d8e8f7}.or-nav .or-nav-num{background:#dcefe5;color:#155b3a}.or-nav span{color:#54677a}.stage,#forecast{scroll-margin-top:95px}
 
 :root{font-family:system-ui,Segoe UI,Arial,sans-serif;color:#202735;background:#f4f2ef}*{box-sizing:border-box}body{margin:0}header{background:#202c3b;color:white;padding:18px 28px}header h1{margin:0;font-size:25px;letter-spacing:2px}header p{margin:5px 0 0;color:#cbd6df;font-size:13px}.layout{display:grid;grid-template-columns:minmax(320px,570px) minmax(330px,1fr);gap:20px;max-width:1320px;margin:22px auto;padding:0 16px}.panel{background:white;border:1px solid #d9dee4;border-radius:13px;padding:18px;box-shadow:0 2px 8px #00000008}h2{font-size:19px;margin:0 0 12px}h3{font-size:16px;margin:20px 0 8px}.hint{color:#576374;font-size:13px;line-height:1.5}.photo{position:relative;max-width:500px;margin:auto;touch-action:none;user-select:none;cursor:default}.photo img{display:block;width:100%;border-radius:9px}.photo svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;touch-action:none}.mount{cursor:grab}.mount:active{cursor:grabbing}.mount ellipse{stroke-width:2.2;fill-opacity:.035;vector-effect:non-scaling-stroke}.mount.selected ellipse{stroke-width:3.7;fill-opacity:.07;stroke-dasharray:8 4}.mount text{font-size:17px;font-weight:750;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round;pointer-events:none}.line{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;opacity:.87;pointer-events:none}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}.btn{background:#244a68;color:white;border:0;border-radius:8px;padding:10px 13px;cursor:pointer;font-weight:650}.btn.secondary{background:#e8edf2;color:#21374c}.btn:disabled{opacity:.5;cursor:default}label{font-size:14px}.mountrow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0}select{width:100%;border:1px solid #c7d1d9;border-radius:7px;padding:9px;background:#fff;font-size:14px}.mountbuttons{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin:14px 0}.mountbuttons button{padding:9px;text-align:left;border:1px solid #cbd4dd;background:#fff;border-radius:8px;cursor:pointer}.mountbuttons button.active{border:2px solid #274f73;background:#eaf3fa;font-weight:700}.mountbuttons small{display:block;color:#647083;font-size:11px}.result{background:#f6f8fa;padding:12px 14px;border-radius:9px;line-height:1.55;font-size:14px}.result p{margin:8px 0}.metric{display:grid;grid-template-columns:1fr auto;gap:8px;border-bottom:1px solid #e9edf0;padding:7px 0;font-size:13px}.tag{display:inline-block;border-radius:20px;background:#e7f0f7;color:#244e6c;padding:3px 9px;font-size:12px}.foot{font-size:12px;color:#677486;margin-top:18px}.status{font-size:13px;color:#315e49;min-height:18px}@media(max-width:870px){.layout{grid-template-columns:1fr}.panel{padding:13px}}
@@ -366,6 +362,7 @@ function renderMounts(){const g=$(&#x27;mounts&#x27;);g.replaceChildren();if(!im
 function updateMountProgress(){if($(&#x27;mountProgress&#x27;))$(&#x27;mountProgress&#x27;).textContent=defs.filter(d=&gt;mounts[d.id].rating!==&#x27;unknown&#x27;).length+&#x27; mont(s) évalué(s) sur 8. « Indéterminé » reste possible.&#x27;}
 function buttons(){const c=$(&#x27;mountbuttons&#x27;);c.replaceChildren();for(const d of defs){const m=mounts[d.id],card=document.createElement(&#x27;div&#x27;);card.className=&#x27;mountcard&#x27;+(d.id===selected?&#x27; active&#x27;:&#x27;&#x27;)+(m.rating!==&#x27;unknown&#x27;?&#x27; completed&#x27;:&#x27;&#x27;);const heading=document.createElement(&#x27;button&#x27;);heading.type=&#x27;button&#x27;;heading.className=&#x27;mountheading&#x27;;heading.innerHTML=&#x27;&lt;span style=&quot;color:&#x27;+d.color+&#x27;&quot;&gt;●&lt;/span&gt; &#x27;+d.name+&#x27;&lt;small&gt;&#x27;+d.sub+&#x27;&lt;/small&gt;&#x27;;heading.onclick=()=&gt;{select(d.id);setMode(&#x27;mounts&#x27;)};const sel=document.createElement(&#x27;select&#x27;);sel.setAttribute(&#x27;aria-label&#x27;,&#x27;Relief du mont de &#x27;+d.name);for(const [val,lab] of [[&#x27;unknown&#x27;,&#x27;Indéterminé / non évalué&#x27;],[&#x27;low&#x27;,&#x27;Peu marqué&#x27;],[&#x27;medium&#x27;,&#x27;Moyen&#x27;],[&#x27;high&#x27;,&#x27;Prononcé&#x27;]]){const o=document.createElement(&#x27;option&#x27;);o.value=val;o.textContent=lab;sel.appendChild(o)}sel.value=m.rating;sel.onchange=e=&gt;{mounts[d.id].rating=e.target.value;selected=d.id;buttons();renderMounts();updateMountProgress();analyze()};card.append(heading,sel);c.appendChild(card)}}
 function select(id){selected=id;const d=defs.find(v=&gt;v.id===id);$(&#x27;notes&#x27;).value=mounts[id].notes;renderMounts();buttons();updateMountProgress()}
+if(document.getElementById(&#x27;hand&#x27;)) document.getElementById(&#x27;hand&#x27;).value=&#x27;left&#x27;;
 function handLabel(){const v=$(&#x27;hand&#x27;).value;$(&#x27;handResult&#x27;).textContent=v===&#x27;right&#x27;?&#x27;Main droite ✓&#x27;:v===&#x27;left&#x27;?&#x27;Main gauche ✓&#x27;:&#x27;À déterminer&#x27;}
 $(&#x27;hand&#x27;).addEventListener(&#x27;change&#x27;,()=&gt;{handLabel();or149Panels(mode);if(!Object.values(lines).some(v=&gt;v.validated)&amp;&amp;Object.values(mounts).every(v=&gt;v.rating===&#x27;unknown&#x27;)){initMounts();renderMounts();}});
 $(&#x27;thumbIdentify&#x27;).onclick=()=&gt;{if(!imageData){status(&#x27;Charge une photographie avant de repérer le pouce.&#x27;);return}thumbPicking=true;setMode(&#x27;lines&#x27;);$(&#x27;thumbHelp&#x27;).textContent=&#x27;Clique maintenant directement sur le POUCE de la photographie à gauche (pas sur un mont).&#x27;;$(&#x27;thumbHelp&#x27;).style.fontWeight=&#x27;bold&#x27;;status(&#x27;Clique sur le pouce visible dans la photographie.&#x27;);};
@@ -422,7 +419,7 @@ function or149Panels(m){
  if(lineGuide)lineGuide.style.display=m===&#x27;lines&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
  if(mountGuide)mountGuide.style.display=m===&#x27;mounts&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
  // Reference diagrams only: mirror for left hand, preserving the uploaded photo and drawn coordinates.
- const selectedSide=document.getElementById(&#x27;hand&#x27;)?.value || (window.frameElement?.id===&#x27;palmFrameLeft&#x27;?&#x27;left&#x27;:&#x27;right&#x27;);
+ const selectedSide=(document.getElementById(&#x27;hand&#x27;)?.value === &#x27;left&#x27; || document.getElementById(&#x27;hand&#x27;)?.value === &#x27;right&#x27;) ? document.getElementById(&#x27;hand&#x27;).value : &#x27;left&#x27;;
  for(const [guide,referenceSide] of [[lineGuide,&#x27;right&#x27;],[mountGuide,&#x27;left&#x27;]])if(guide){
    guide.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=&gt;{el.style.transform=selectedSide!==referenceSide?&#x27;scaleX(-1)&#x27;:&#x27;none&#x27;;});
  }
@@ -567,12 +564,7 @@ const lineGuide=guides.find(g=&gt;/quatre lignes/i.test(g.querySelector(&#x27;su
 const mountGuide=guides.find(g=&gt;/monts/i.test(g.querySelector(&#x27;summary&#x27;)?.textContent||&#x27;&#x27;));
 let stage=&#x27;lines&#x27;;
 function update(){
-  // Each embedded module has a fixed hand side, selected in the parent interface.
-  let side=hand?.value;
-  try {
-    if(window.frameElement?.id===&#x27;palmFrameLeft&#x27;) side=&#x27;left&#x27;;
-    else if(window.frameElement?.id===&#x27;palmFrame&#x27;) side=&#x27;right&#x27;;
-  } catch(e) {}
+  const side=hand?.value;
   const hasPhoto=!!(photo &amp;&amp; photo.getAttribute(&#x27;src&#x27;) &amp;&amp; photo.getAttribute(&#x27;src&#x27;).startsWith(&#x27;data:image/&#x27;));
   const ready=hasPhoto &amp;&amp; (side===&#x27;left&#x27;||side===&#x27;right&#x27;);
   guides.forEach(g=&gt;{g.style.setProperty(&#x27;display&#x27;,&#x27;none&#x27;,&#x27;important&#x27;);g.open=false;});
@@ -597,7 +589,7 @@ window.addEventListener(&#x27;load&#x27;,update);
 window.addEventListener(&#x27;pageshow&#x27;,update);
 update();
 })();
-&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;&quot; style=&quot;display:none" title="Module guidé de chiromancie"></iframe></div></section>
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;&quot; style=&quot;display:none&quot; title=&quot;Module guidé de chiromancie"></iframe></div></section>
 <section class="panel view" id="west"><h2>Zodiaque occidental · signe et décan</h2><p class="hint">Lecture symbolique du signe solaire et de son décan. Les dates sont conventionnelles : à la frontière entre deux signes, l'heure et le lieu de naissance sont nécessaires pour une précision astronomique.</p><div id="orWestReading" class="module" aria-live="polite"></div></section>
 <section class="panel view" id="east"><h2>Zodiaque chinois · animal et élément</h2><p class="hint">Calcul d'après la date du Nouvel An lunaire, et non le 1er janvier. Certaines traditions retiennent Li Chun : notre convention est indiquée ici pour rester reproductible.</p><div id="orEastReading" class="module" aria-live="polite"></div></section>
 <section class="panel view" id="fusion"><h2>Portrait global personnalisé</h2><p class="hint">Le portrait provient des lignes et des monts renseignés dans l'étude de la main. La numérologie ajoute un second niveau de lecture ; les interprétations restent symboliques.</p><div class="toolbar"><button class="primary" id="cross">Actualiser le croisement</button><button data-tab="forecast">Voir les prévisions →</button></div><div class="reportbox" id="fusionResult">Commence par renseigner le profil et étudier la main, puis actualise le croisement.</div></section>
