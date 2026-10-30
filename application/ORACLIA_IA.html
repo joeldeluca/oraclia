@@ -253,6 +253,44 @@ buttons();renderLines();analyze();setMode(&#x27;lines&#x27;);updateMountProgress
  for(const id of [&#x27;modeLines&#x27;,&#x27;modeMounts&#x27;]){const el=document.getElementById(id);if(el)observer.observe(el,{attributes:true,attributeFilter:[&#x27;class&#x27;]});}
  refreshReference();
 })();
+&lt;/script&gt;&lt;script id=&quot;oraclia-guides-after-hand-v3&quot;&gt;
+(function(){
+&#x27;use strict&#x27;;
+const hand=document.getElementById(&#x27;hand&#x27;);
+const photo=document.getElementById(&#x27;photoimg&#x27;);
+const file=document.getElementById(&#x27;file&#x27;);
+const modeLines=document.getElementById(&#x27;modeLines&#x27;);
+const modeMounts=document.getElementById(&#x27;modeMounts&#x27;);
+const guides=Array.from(document.querySelectorAll(&#x27;details.guide&#x27;));
+const lineGuide=guides.find(g=&gt;/quatre lignes/i.test(g.querySelector(&#x27;summary&#x27;)?.textContent||&#x27;&#x27;));
+const mountGuide=guides.find(g=&gt;/monts/i.test(g.querySelector(&#x27;summary&#x27;)?.textContent||&#x27;&#x27;));
+let stage=&#x27;lines&#x27;;
+function update(){
+  const side=hand?.value;
+  const hasPhoto=!!(photo &amp;&amp; photo.getAttribute(&#x27;src&#x27;) &amp;&amp; photo.getAttribute(&#x27;src&#x27;).startsWith(&#x27;data:image/&#x27;));
+  const ready=hasPhoto &amp;&amp; (side===&#x27;left&#x27;||side===&#x27;right&#x27;);
+  guides.forEach(g=&gt;{g.style.setProperty(&#x27;display&#x27;,&#x27;none&#x27;,&#x27;important&#x27;);g.open=false;});
+  const selected=stage===&#x27;mounts&#x27;?mountGuide:lineGuide;
+  if(!ready||!selected)return;
+  selected.style.setProperty(&#x27;display&#x27;,&#x27;block&#x27;,&#x27;important&#x27;);
+  selected.open=true;
+  // Reference line photo has thumb on the right (right hand).
+  // Reference mount photo has thumb on the left (left hand).
+  const base=stage===&#x27;lines&#x27;?&#x27;right&#x27;:&#x27;left&#x27;;
+  selected.querySelectorAll(&#x27;img&#x27;).forEach(img=&gt;{
+    img.style.setProperty(&#x27;transform&#x27;,side===base?&#x27;none&#x27;:&#x27;scaleX(-1)&#x27;,&#x27;important&#x27;);
+    img.style.setProperty(&#x27;transform-origin&#x27;,&#x27;center center&#x27;,&#x27;important&#x27;);
+  });
+}
+modeLines?.addEventListener(&#x27;click&#x27;,()=&gt;{stage=&#x27;lines&#x27;;update();});
+modeMounts?.addEventListener(&#x27;click&#x27;,()=&gt;{stage=&#x27;mounts&#x27;;update();});
+hand?.addEventListener(&#x27;change&#x27;,update);
+file?.addEventListener(&#x27;change&#x27;,()=&gt;setTimeout(update,150));
+if(photo)new MutationObserver(update).observe(photo,{attributes:true,attributeFilter:[&#x27;src&#x27;,&#x27;style&#x27;]});
+window.addEventListener(&#x27;load&#x27;,update);
+window.addEventListener(&#x27;pageshow&#x27;,update);
+update();
+})();
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" title="Module guidé de chiromancie"></iframe><iframe id="palmFrameLeft" loading="eager" srcdoc="&lt;!doctype html&gt;&lt;html lang=&quot;fr&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;ORACLIA — Étude guidée d’une nouvelle main&lt;/title&gt;&lt;style&gt;
 html{scroll-behavior:smooth} .or-nav{position:sticky;top:0;z-index:90;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:11px 14px;background:#fff;border-bottom:1px solid #d3dce6;box-shadow:0 2px 8px #00000012;font:600 13px system-ui,sans-serif}.or-nav a{color:#214767;background:#edf2f7;border-radius:7px;padding:9px 12px;text-decoration:none}.or-nav a:hover,.or-nav a:focus{background:#d8e8f7}.or-nav .or-nav-num{background:#dcefe5;color:#155b3a}.or-nav span{color:#54677a}.stage,#forecast{scroll-margin-top:95px}
 
@@ -510,6 +548,44 @@ buttons();renderLines();analyze();setMode(&#x27;lines&#x27;);updateMountProgress
  const observer=new MutationObserver(refreshReference);
  for(const id of [&#x27;modeLines&#x27;,&#x27;modeMounts&#x27;]){const el=document.getElementById(id);if(el)observer.observe(el,{attributes:true,attributeFilter:[&#x27;class&#x27;]});}
  refreshReference();
+})();
+&lt;/script&gt;&lt;script id=&quot;oraclia-guides-after-hand-v3&quot;&gt;
+(function(){
+&#x27;use strict&#x27;;
+const hand=document.getElementById(&#x27;hand&#x27;);
+const photo=document.getElementById(&#x27;photoimg&#x27;);
+const file=document.getElementById(&#x27;file&#x27;);
+const modeLines=document.getElementById(&#x27;modeLines&#x27;);
+const modeMounts=document.getElementById(&#x27;modeMounts&#x27;);
+const guides=Array.from(document.querySelectorAll(&#x27;details.guide&#x27;));
+const lineGuide=guides.find(g=&gt;/quatre lignes/i.test(g.querySelector(&#x27;summary&#x27;)?.textContent||&#x27;&#x27;));
+const mountGuide=guides.find(g=&gt;/monts/i.test(g.querySelector(&#x27;summary&#x27;)?.textContent||&#x27;&#x27;));
+let stage=&#x27;lines&#x27;;
+function update(){
+  const side=hand?.value;
+  const hasPhoto=!!(photo &amp;&amp; photo.getAttribute(&#x27;src&#x27;) &amp;&amp; photo.getAttribute(&#x27;src&#x27;).startsWith(&#x27;data:image/&#x27;));
+  const ready=hasPhoto &amp;&amp; (side===&#x27;left&#x27;||side===&#x27;right&#x27;);
+  guides.forEach(g=&gt;{g.style.setProperty(&#x27;display&#x27;,&#x27;none&#x27;,&#x27;important&#x27;);g.open=false;});
+  const selected=stage===&#x27;mounts&#x27;?mountGuide:lineGuide;
+  if(!ready||!selected)return;
+  selected.style.setProperty(&#x27;display&#x27;,&#x27;block&#x27;,&#x27;important&#x27;);
+  selected.open=true;
+  // Reference line photo has thumb on the right (right hand).
+  // Reference mount photo has thumb on the left (left hand).
+  const base=stage===&#x27;lines&#x27;?&#x27;right&#x27;:&#x27;left&#x27;;
+  selected.querySelectorAll(&#x27;img&#x27;).forEach(img=&gt;{
+    img.style.setProperty(&#x27;transform&#x27;,side===base?&#x27;none&#x27;:&#x27;scaleX(-1)&#x27;,&#x27;important&#x27;);
+    img.style.setProperty(&#x27;transform-origin&#x27;,&#x27;center center&#x27;,&#x27;important&#x27;);
+  });
+}
+modeLines?.addEventListener(&#x27;click&#x27;,()=&gt;{stage=&#x27;lines&#x27;;update();});
+modeMounts?.addEventListener(&#x27;click&#x27;,()=&gt;{stage=&#x27;mounts&#x27;;update();});
+hand?.addEventListener(&#x27;change&#x27;,update);
+file?.addEventListener(&#x27;change&#x27;,()=&gt;setTimeout(update,150));
+if(photo)new MutationObserver(update).observe(photo,{attributes:true,attributeFilter:[&#x27;src&#x27;,&#x27;style&#x27;]});
+window.addEventListener(&#x27;load&#x27;,update);
+window.addEventListener(&#x27;pageshow&#x27;,update);
+update();
 })();
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;&quot; style=&quot;display:none" title="Module guidé de chiromancie"></iframe></div></section>
 <section class="panel view" id="west"><h2>Zodiaque occidental · signe et décan</h2><p class="hint">Lecture symbolique du signe solaire et de son décan. Les dates sont conventionnelles : à la frontière entre deux signes, l'heure et le lieu de naissance sont nécessaires pour une précision astronomique.</p><div id="orWestReading" class="module" aria-live="polite"></div></section>
