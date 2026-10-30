@@ -1331,7 +1331,7 @@ const read=(key)=>new Promise((resolve,reject)=>{const tx=db.transaction('hands'
 function metrics(st){const ls=Object.values(st?.lines||{}).filter(v=>v?.validated).length;const ms=Object.values(st?.mounts||{}).filter(v=>v?.rating&&v.rating!=='unknown').length;return {ls,ms};}
 function show(){if(!progress)return;progress.textContent=['right','left'].map(side=>{const st=stored[side]||getStudy(side),m=metrics(st);return (side==='right'?'Droite':'Gauche')+' : '+m.ls+'/4 lignes, '+m.ms+'/8 monts'+(st?.image?.dataUrl?' · sauvegarde automatique':' · à compléter');}).join('   |   ');}
 function snapshot(side){try{const st=getStudy(side);if(!st?.image?.dataUrl)return null;return {...st,hand:side};}catch(e){return null}}
-async function tick(){if(!ready||restoring)return;for(const side of ['right','left']){const st=snapshot(side);if(!st)continue;
+async function tick(){if(!ready||restoring||window.__oracliaDeclinedRestore)return;for(const side of ['right','left']){const st=snapshot(side);if(!st)continue;
  const json=JSON.stringify(st);if(json===last[side])continue;last[side]=json;stored[side]=st;
  try{await write(side,st);}catch(e){if(state)state.textContent='Sauvegarde locale indisponible : exportez le dossier JSON. '+e.message;}
  }show();}
@@ -1345,14 +1345,16 @@ async function init(){try{db=await database();const prior={right:await read('rig
   if(confirm('ORACLIA a retrouvé des études des mains enregistrées automatiquement sur cet ordinateur. Les restaurer ?')){
    restoring=true;for(const side of ['right','left']){if(prior[side]?.image?.dataUrl){await inject(side,prior[side]);stored[side]=prior[side];last[side]=JSON.stringify(prior[side]);}}
    restoring=false;
-  }
+  } else {window.__oracliaDeclinedRestore=true; ready=false; if(state)state.textContent='Restauration refusée : ancien dossier conservé. Pour créer un nouveau dossier indépendant, exportez d’abord votre travail.';}
  }
- if(state)state.textContent='Enregistrement automatique local actif. Exportez le dossier complet pour conserver une copie transférable.';
+ if(state && !window.__oracliaDeclinedRestore)state.textContent='Enregistrement automatique local actif. Exportez le dossier complet pour conserver une copie transférable.';
  }catch(e){if(state)state.textContent='Enregistrement automatique persistant indisponible : utilisez Exporter le dossier complet.';}
  ready=true;show();setInterval(tick,1500);
 }
 // Le navigateur doit avoir chargé les deux modules avant la restauration.
-window.addEventListener('load',()=>setTimeout(init,650));
+// Correctif 14.9.1 : ancien moteur désactivé ; données IndexedDB conservées.
+// La restauration et l'enregistrement sont gérés exclusivement par le dossier complet.
+// window.addEventListener('load',()=>setTimeout(init,650));
 // Les imports de dossier sont repris au prochain cycle et écrasent les sauvegardes de la session.
 })();
 </script><script>
@@ -1455,7 +1457,10 @@ dedicatedInput.addEventListener('change',async()=>{
   status('Importation de « '+name+' » ('+birth+') depuis '+f.name+' : restauration des mains en cours…');
  }catch(err){paused=false;status('Import refusé : '+err.message);console.error(err)}
 });
-window.addEventListener('load',()=>setTimeout(async()=>{try{db=await openDB();const old=await read();if(importSeq===0&&valid(old)&&hasData(old))restore(old);else if(importSeq===0){paused=false;status('Sauvegarde prête : renseignez un profil.')}setInterval(()=>backup(),3000);}catch(e){paused=false;status('Stockage local indisponible : '+e.message+' — utilisez le JSON.')}},2100));
+window.addEventListener('load',()=>setTimeout(async()=>{try{db=await openDB();const old=await read();if(importSeq===0&&valid(old)&&hasData(old)){
+  if(confirm('ORACLIA a retrouvé un dossier enregistré sur cet ordinateur. Voulez-vous le restaurer ?')){restore(old)}
+  else {paused=true;window.__oracliaDeclinedRestore=true;status('Restauration annulée : page vierge. Votre ancien dossier reste conservé sans être chargé. Pour repartir avec un nouveau dossier sauvegardable, exportez si besoin puis utilisez Options avancées > Effacer la sauvegarde locale.')}
+ }else if(importSeq===0){paused=false;status('Sauvegarde prête : renseignez un profil.')}setInterval(()=>backup(),3000);}catch(e){paused=false;status('Stockage local indisponible : '+e.message+' — utilisez le JSON.')}},2600));
 })();
 </script><script>
 /* ORACLIA 13.0 — portrait global, méthodes facultatives, synthèse explicite */
