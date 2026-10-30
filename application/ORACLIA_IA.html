@@ -136,7 +136,7 @@ function or149Panels(m){
  // Reference diagrams only: mirror for left hand, preserving the uploaded photo and drawn coordinates.
  const isLeft=document.getElementById(&#x27;hand&#x27;)?.value===&#x27;left&#x27;;
  for(const guide of [lineGuide,mountGuide])if(guide){
-   guide.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=>{el.style.transform=isLeft?&#x27;scaleX(-1)&#x27;:&#x27;&#x27;;});
+   guide.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=&gt;{el.style.transform=isLeft?&#x27;scaleX(-1)&#x27;:&#x27;&#x27;;});
  }
 
 }
@@ -217,6 +217,39 @@ const originalAnalyze=analyze;
 analyze=function(){originalAnalyze();forecast()};
 
 buttons();renderLines();analyze();setMode(&#x27;lines&#x27;);updateMountProgress();
+&lt;/script&gt;&lt;script&gt;
+/* ORACLIA Web Beta: reference illustrations only; no personal photo/annotations changed. */
+(function(){
+ const frameSide=(window.frameElement &amp;&amp; window.frameElement.id===&#x27;palmFrameLeft&#x27;)?&#x27;left&#x27;:&#x27;right&#x27;;
+ function refreshReference(){
+  const select=document.getElementById(&#x27;hand&#x27;);
+  const side=select &amp;&amp; (select.value===&#x27;left&#x27;||select.value===&#x27;right&#x27;)?select.value:frameSide;
+  const guides=[...document.querySelectorAll(&#x27;details.guide&#x27;)];
+  const lineGuides=guides.filter(g=&gt;/quatre lignes/i.test(g.querySelector(&#x27;summary&#x27;)?.textContent||&#x27;&#x27;));
+  const mountGuides=guides.filter(g=&gt;/monts/i.test(g.querySelector(&#x27;summary&#x27;)?.textContent||&#x27;&#x27;));
+  const mountMode=document.getElementById(&#x27;modeMounts&#x27;);
+  const linesMode=document.getElementById(&#x27;modeLines&#x27;);
+  const isMount=mountMode &amp;&amp; linesMode &amp;&amp; !mountMode.classList.contains(&#x27;secondary&#x27;) &amp;&amp; linesMode.classList.contains(&#x27;secondary&#x27;);
+  for(const [arr,visible,originalSide] of [[lineGuides,!isMount,&#x27;right&#x27;],[mountGuides,isMount,&#x27;left&#x27;]]){
+   arr.forEach((g,i)=&gt;{
+    const show=visible &amp;&amp; i===0;
+    if(g.style.display!==(show?&#x27;&#x27;:&#x27;none&#x27;))g.style.display=show?&#x27;&#x27;:&#x27;none&#x27;;
+    g.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=&gt;{
+     const flip=side!==originalSide;
+     const value=flip?&#x27;scaleX(-1)&#x27;:&#x27;none&#x27;;
+     if(el.style.transform!==value)el.style.transform=value;
+    });
+   });
+  }
+ }
+ document.getElementById(&#x27;hand&#x27;)?.addEventListener(&#x27;change&#x27;,refreshReference);
+ document.getElementById(&#x27;modeLines&#x27;)?.addEventListener(&#x27;click&#x27;,()=&gt;setTimeout(refreshReference,0));
+ document.getElementById(&#x27;modeMounts&#x27;)?.addEventListener(&#x27;click&#x27;,()=&gt;setTimeout(refreshReference,0));
+ document.getElementById(&#x27;validate&#x27;)?.addEventListener(&#x27;click&#x27;,()=&gt;setTimeout(refreshReference,0));
+ const observer=new MutationObserver(refreshReference);
+ for(const id of [&#x27;modeLines&#x27;,&#x27;modeMounts&#x27;]){const el=document.getElementById(id);if(el)observer.observe(el,{attributes:true,attributeFilter:[&#x27;class&#x27;]});}
+ refreshReference();
+})();
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;" title="Module guidé de chiromancie"></iframe><iframe id="palmFrameLeft" loading="eager" srcdoc="&lt;!doctype html&gt;&lt;html lang=&quot;fr&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;&lt;title&gt;ORACLIA — Étude guidée d’une nouvelle main&lt;/title&gt;&lt;style&gt;
 html{scroll-behavior:smooth} .or-nav{position:sticky;top:0;z-index:90;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:11px 14px;background:#fff;border-bottom:1px solid #d3dce6;box-shadow:0 2px 8px #00000012;font:600 13px system-ui,sans-serif}.or-nav a{color:#214767;background:#edf2f7;border-radius:7px;padding:9px 12px;text-decoration:none}.or-nav a:hover,.or-nav a:focus{background:#d8e8f7}.or-nav .or-nav-num{background:#dcefe5;color:#155b3a}.or-nav span{color:#54677a}.stage,#forecast{scroll-margin-top:95px}
 
@@ -345,7 +378,7 @@ function or149Panels(m){
  // Reference diagrams only: mirror for left hand, preserving the uploaded photo and drawn coordinates.
  const isLeft=document.getElementById(&#x27;hand&#x27;)?.value===&#x27;left&#x27;;
  for(const guide of [lineGuide,mountGuide])if(guide){
-   guide.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=>{el.style.transform=isLeft?&#x27;scaleX(-1)&#x27;:&#x27;&#x27;;});
+   guide.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=&gt;{el.style.transform=isLeft?&#x27;scaleX(-1)&#x27;:&#x27;&#x27;;});
  }
 
 }
@@ -438,6 +471,39 @@ buttons();renderLines();analyze();setMode(&#x27;lines&#x27;);updateMountProgress
    if(!selector)return;
    if(selector.value!==side){selector.value=side;selector.dispatchEvent(new Event(&#x27;change&#x27;,{bubbles:true}));}
  };
+})();
+&lt;/script&gt;&lt;script&gt;
+/* ORACLIA Web Beta: reference illustrations only; no personal photo/annotations changed. */
+(function(){
+ const frameSide=(window.frameElement &amp;&amp; window.frameElement.id===&#x27;palmFrameLeft&#x27;)?&#x27;left&#x27;:&#x27;right&#x27;;
+ function refreshReference(){
+  const select=document.getElementById(&#x27;hand&#x27;);
+  const side=select &amp;&amp; (select.value===&#x27;left&#x27;||select.value===&#x27;right&#x27;)?select.value:frameSide;
+  const guides=[...document.querySelectorAll(&#x27;details.guide&#x27;)];
+  const lineGuides=guides.filter(g=&gt;/quatre lignes/i.test(g.querySelector(&#x27;summary&#x27;)?.textContent||&#x27;&#x27;));
+  const mountGuides=guides.filter(g=&gt;/monts/i.test(g.querySelector(&#x27;summary&#x27;)?.textContent||&#x27;&#x27;));
+  const mountMode=document.getElementById(&#x27;modeMounts&#x27;);
+  const linesMode=document.getElementById(&#x27;modeLines&#x27;);
+  const isMount=mountMode &amp;&amp; linesMode &amp;&amp; !mountMode.classList.contains(&#x27;secondary&#x27;) &amp;&amp; linesMode.classList.contains(&#x27;secondary&#x27;);
+  for(const [arr,visible,originalSide] of [[lineGuides,!isMount,&#x27;right&#x27;],[mountGuides,isMount,&#x27;left&#x27;]]){
+   arr.forEach((g,i)=&gt;{
+    const show=visible &amp;&amp; i===0;
+    if(g.style.display!==(show?&#x27;&#x27;:&#x27;none&#x27;))g.style.display=show?&#x27;&#x27;:&#x27;none&#x27;;
+    g.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=&gt;{
+     const flip=side!==originalSide;
+     const value=flip?&#x27;scaleX(-1)&#x27;:&#x27;none&#x27;;
+     if(el.style.transform!==value)el.style.transform=value;
+    });
+   });
+  }
+ }
+ document.getElementById(&#x27;hand&#x27;)?.addEventListener(&#x27;change&#x27;,refreshReference);
+ document.getElementById(&#x27;modeLines&#x27;)?.addEventListener(&#x27;click&#x27;,()=&gt;setTimeout(refreshReference,0));
+ document.getElementById(&#x27;modeMounts&#x27;)?.addEventListener(&#x27;click&#x27;,()=&gt;setTimeout(refreshReference,0));
+ document.getElementById(&#x27;validate&#x27;)?.addEventListener(&#x27;click&#x27;,()=&gt;setTimeout(refreshReference,0));
+ const observer=new MutationObserver(refreshReference);
+ for(const id of [&#x27;modeLines&#x27;,&#x27;modeMounts&#x27;]){const el=document.getElementById(id);if(el)observer.observe(el,{attributes:true,attributeFilter:[&#x27;class&#x27;]});}
+ refreshReference();
 })();
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;&quot; style=&quot;display:none" title="Module guidé de chiromancie"></iframe></div></section>
 <section class="panel view" id="west"><h2>Zodiaque occidental · signe et décan</h2><p class="hint">Lecture symbolique du signe solaire et de son décan. Les dates sont conventionnelles : à la frontière entre deux signes, l'heure et le lieu de naissance sont nécessaires pour une précision astronomique.</p><div id="orWestReading" class="module" aria-live="polite"></div></section>
