@@ -134,9 +134,9 @@ function or149Panels(m){
  if(lineGuide)lineGuide.style.display=m===&#x27;lines&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
  if(mountGuide)mountGuide.style.display=m===&#x27;mounts&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
  // Reference diagrams only: mirror for left hand, preserving the uploaded photo and drawn coordinates.
- const isLeft=document.getElementById(&#x27;hand&#x27;)?.value===&#x27;left&#x27;;
- for(const guide of [lineGuide,mountGuide])if(guide){
-   guide.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=&gt;{el.style.transform=isLeft?&#x27;scaleX(-1)&#x27;:&#x27;&#x27;;});
+ const selectedSide=document.getElementById(&#x27;hand&#x27;)?.value || (window.frameElement?.id===&#x27;palmFrameLeft&#x27;?&#x27;left&#x27;:&#x27;right&#x27;);
+ for(const [guide,referenceSide] of [[lineGuide,&#x27;right&#x27;],[mountGuide,&#x27;left&#x27;]])if(guide){
+   guide.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=&gt;{el.style.transform=selectedSide!==referenceSide?&#x27;scaleX(-1)&#x27;:&#x27;none&#x27;;});
  }
 
 }
@@ -243,6 +243,9 @@ buttons();renderLines();analyze();setMode(&#x27;lines&#x27;);updateMountProgress
   }
  }
  document.getElementById(&#x27;hand&#x27;)?.addEventListener(&#x27;change&#x27;,refreshReference);
+ window.addEventListener(&#x27;load&#x27;,refreshReference);
+ window.addEventListener(&#x27;pageshow&#x27;,refreshReference);
+ document.getElementById(&#x27;file&#x27;)?.addEventListener(&#x27;change&#x27;,()=&gt;setTimeout(refreshReference,100));
  document.getElementById(&#x27;modeLines&#x27;)?.addEventListener(&#x27;click&#x27;,()=&gt;setTimeout(refreshReference,0));
  document.getElementById(&#x27;modeMounts&#x27;)?.addEventListener(&#x27;click&#x27;,()=&gt;setTimeout(refreshReference,0));
  document.getElementById(&#x27;validate&#x27;)?.addEventListener(&#x27;click&#x27;,()=&gt;setTimeout(refreshReference,0));
@@ -376,9 +379,9 @@ function or149Panels(m){
  if(lineGuide)lineGuide.style.display=m===&#x27;lines&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
  if(mountGuide)mountGuide.style.display=m===&#x27;mounts&#x27;?&#x27;&#x27;:&#x27;none&#x27;;
  // Reference diagrams only: mirror for left hand, preserving the uploaded photo and drawn coordinates.
- const isLeft=document.getElementById(&#x27;hand&#x27;)?.value===&#x27;left&#x27;;
- for(const guide of [lineGuide,mountGuide])if(guide){
-   guide.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=&gt;{el.style.transform=isLeft?&#x27;scaleX(-1)&#x27;:&#x27;&#x27;;});
+ const selectedSide=document.getElementById(&#x27;hand&#x27;)?.value || (window.frameElement?.id===&#x27;palmFrameLeft&#x27;?&#x27;left&#x27;:&#x27;right&#x27;);
+ for(const [guide,referenceSide] of [[lineGuide,&#x27;right&#x27;],[mountGuide,&#x27;left&#x27;]])if(guide){
+   guide.querySelectorAll(&#x27;img,svg,canvas&#x27;).forEach(el=&gt;{el.style.transform=selectedSide!==referenceSide?&#x27;scaleX(-1)&#x27;:&#x27;none&#x27;;});
  }
 
 }
@@ -498,6 +501,9 @@ buttons();renderLines();analyze();setMode(&#x27;lines&#x27;);updateMountProgress
   }
  }
  document.getElementById(&#x27;hand&#x27;)?.addEventListener(&#x27;change&#x27;,refreshReference);
+ window.addEventListener(&#x27;load&#x27;,refreshReference);
+ window.addEventListener(&#x27;pageshow&#x27;,refreshReference);
+ document.getElementById(&#x27;file&#x27;)?.addEventListener(&#x27;change&#x27;,()=&gt;setTimeout(refreshReference,100));
  document.getElementById(&#x27;modeLines&#x27;)?.addEventListener(&#x27;click&#x27;,()=&gt;setTimeout(refreshReference,0));
  document.getElementById(&#x27;modeMounts&#x27;)?.addEventListener(&#x27;click&#x27;,()=&gt;setTimeout(refreshReference,0));
  document.getElementById(&#x27;validate&#x27;)?.addEventListener(&#x27;click&#x27;,()=&gt;setTimeout(refreshReference,0));
